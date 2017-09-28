@@ -1,0 +1,21 @@
+FROM centos:7
+LABEL author=gin mail=bobo1314love@vip.qq.com
+RUN curl http://mirrors.163.com/.help/CentOS7-Base-163.repo > /etc/yum.repos.d/CentOS-Base.repo
+ENV HTTPD_VERSION=2.4.27
+WORKDIR /tmp
+RUN curl -O http://mirror.reverse.net/pub/apache//httpd/httpd-2.4.27.tar.gz
+RUN tar -zxf httpd-2.4.27.tar.gz -C /usr/local/src/
+RUN curl -O http://www.trieuvan.com/apache//apr/apr-1.6.2.tar.gz
+RUN tar -zxf apr-1.6.2.tar.gz -C /usr/local/src/httpd-2.4.27/srclib/
+RUN curl -O http://www.trieuvan.com/apache//apr/apr-util-1.6.0.tar.gz
+RUN tar -zxf apr-util-1.6.0.tar.gz -C /usr/local/src/httpd-2.4.27/srclib/
+RUN mv /usr/local/src/httpd-2.4.27/srclib/apr-1.6.2 /usr/local/src/httpd-2.4.27/srclib/apr
+RUN mv /usr/local/src/httpd-2.4.27/srclib/apr-util-1.6.0 /usr/local/src/httpd-2.4.27/srclib/apr-util
+RUN curl -O ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.41.tar.gz
+RUN tar -zxf pcre-8.41.tar.gz -C /usr/local/src/
+RUN yum install -y gcc gcc-c++ make expat-devel
+RUN cd /usr/local/src/pcre-8.41/ && ./configure --prefix=/usr/local/pcre && make && make install
+RUN cd /usr/local/src/httpd-2.4.27/ && ./configure --with-included-apr --with-included-apr-util --with-pcre=/usr/local/pcre --enable-so && make && make install
+RUN echo 'clean_requirements_on_remove=1' >> /etc/yum.conf
+RUN yum autoremove -y gcc gcc-c++ make expat-devel
+RUN yum clean all
